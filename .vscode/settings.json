@@ -1,0 +1,12 @@
+{
+  "yaml.validate": true,
+  "yaml.completion": true,
+  "kubernetes": [
+    "deployments/k8s/*.yaml",
+    "deployments/k8s/**/*.yaml"
+  ],
+  "vs-kubernetes": {
+    "vscode-kubernetes.kubectl-path-linux": "/usr/local/bin/kubectl",
+    "vscode-kubernetes.helm-path-linux": "/usr/local/bin/helm",
+  }
+}
