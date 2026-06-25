@@ -15,10 +15,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     -o /build/goblncr \
     /build/cmd/goblncr.go
 
-#ENTRYPOINT ["sleep", "10000"]
-
 # Run
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/static-debian13
 WORKDIR /app
 
 COPY --from=build /build/goblncr /app/goblncr
