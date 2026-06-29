@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: influxdb
+  name: influxdb
+  namespace: goblncr-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+        - name: influxdb
+          image: influxdb:2.7
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "128M"
+              cpu: "250m"
+            limits:
+              memory: "256M"
+              cpu: "500m"
+
+          ports:
+            - containerPort: 8086
+              protocol: TCP
+
+          volumeMounts:
+            - mountPath: /var/lib/influxdb2
+              name: influxdb-data
+          envFrom:
+            - configMapRef:
+                name: influxdb
+
+      restartPolicy: Always
+      volumes:
+        - name: influxdb-data
+          persistentVolumeClaim:
+            claimName: influxdb-data
