@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: express-stats
+  namespace: goblncr-test
+data:
+  INFLUX_BUCKET: request_stats
+  INFLUX_ORG: goblncr-test
+  INFLUX_TOKEN: tokenMirEgal
+  INFLUX_URL: http://influxdb-svc:8086

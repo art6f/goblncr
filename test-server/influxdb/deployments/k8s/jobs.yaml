@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: provision-influx-dashboards
+  namespace: goblncr-test
+spec:
+  template:
+    spec:
+      containers:
+      - name: template-installer
+        image: influxdb:2.7-alpine
+        imagePullPolicy: IfNotPresent
+        command: ["influx", "apply"]
+        args:
+        - "--host=http://influxdb-svc:8086"
+        - "--file=/etc/config/pods_distribution_dashboard.json"
+        - "--force=yes"
+        env:
+        - name: INFLUX_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: influxdb-config
+              key: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+        - name: INFLUX_ORG
+          valueFrom:
+            configMapKeyRef:
+              name: influxdb-config
+              key: DOCKER_INFLUXDB_INIT_ORG
+        
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+      
+      volumes:
+        - name: config-volume
+          configMap:
+            name: influxdb-config
+            items:
+              - key: pods_distribution_dashboard.json
+                path: pods_distribution_dashboard.json
+      restartPolicy: OnFailure
