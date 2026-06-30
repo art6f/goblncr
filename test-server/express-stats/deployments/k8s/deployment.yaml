@@ -38,5 +38,5 @@ spec:
             - name: K8S_POD_ID
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.uid
+                  fieldPath: metadata.name
       restartPolicy: Always
