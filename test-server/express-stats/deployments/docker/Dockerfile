@@ -1,18 +1,11 @@
-FROM node:26.4.0-alpine AS builder
-
-WORKDIR /build
-
-COPY package*.json /build/
-RUN npm install
-
-COPY . /build/
-
-# runner
-FROM node:26.4.0-alpine AS runner
+FROM node:26.4.0-alpine
 
 WORKDIR /app
-COPY --from=builder /build /app/
+
+COPY package*.json .
+RUN npm install
+COPY . .
 
 EXPOSE 8083
 
-CMD ["npm", "run", "app"]
+CMD ["npx", "tsx", "src/index.ts"]

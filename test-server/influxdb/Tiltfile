@@ -3,10 +3,11 @@ DIR_DEPLOYMENTS = os.path.join(DIR_ROOT, 'deployments', '/')
 
 # configs
 k8s_yaml([
-    DIR_DEPLOYMENTS + "/k8s/pvc.yaml",
     DIR_DEPLOYMENTS + "/k8s/configmap.yaml",
+    DIR_DEPLOYMENTS + "/k8s/pvc.yaml",
     DIR_DEPLOYMENTS + "/k8s/deployment.yaml",
     DIR_DEPLOYMENTS + "/k8s/service.yaml",
+    DIR_DEPLOYMENTS + "/k8s/jobs.yaml",
 ])
 
 k8s_resource(

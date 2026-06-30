@@ -38,7 +38,7 @@ spec:
               name: influxdb-data
           envFrom:
             - configMapRef:
-                name: influxdb
+                name: influxdb-config
 
       restartPolicy: Always
       volumes:
