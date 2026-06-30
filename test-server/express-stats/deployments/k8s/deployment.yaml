@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express-stats
+  namespace: goblncr-test
+  labels:
+    app: express-stats
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: express-stats
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: express-stats
+    spec:
+      containers:
+        - name: express-stats
+          image: express-stats
+          ports:
+            - containerPort: 8083
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "50M"
+            limits:
+              cpu: "500m"
+              memory: "100M"
+          volumeMounts:
+            - mountPath: /app
+              name: express-stats-pvc
+          
+          envFrom:
+            - configMapRef:
+                name: express-stats
+          
+          env:
+            - name: K8S_POD_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+      restartPolicy: Always
+      volumes:
+        - name: express-stats-pvc
+          persistentVolumeClaim:
+            claimName: express-stats-pvc

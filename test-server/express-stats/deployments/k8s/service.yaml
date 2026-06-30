@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: influxdb-svc
+  name: express-stats-svc
   namespace: goblncr-test
   labels:
-    app: influxdb
+    app: express-stats-svc
 spec:
   ports:
     - name: "web-port"
-      port: 8086
+      port: 8083
   selector:
-    app: influxdb
+    app: express-stats
