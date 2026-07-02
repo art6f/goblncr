@@ -19,6 +19,8 @@ interface Stat {
 }
 
 export default function writeLog(stat: Stat): void {
+  console.log(`Respose from [${stat.podId}]: endpoint ${stat.endpoint}`)
+
   const point = new Point('request')
     .tag('pod_id', stat.podId)
     .tag('endpoint', stat.endpoint)

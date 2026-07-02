@@ -17,8 +17,8 @@ docker_build(
     build_args={'--no-cache':''}
 )
 
-
 k8s_resource(
   "express-stats",
   port_forwards=8083,
+  labels=['Test-Server']
 )
