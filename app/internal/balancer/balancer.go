@@ -15,19 +15,19 @@ type Balancer struct {
 }
 
 func NewBalancer() *Balancer {
-	return &Balancer {
+	return &Balancer{
 		client: k8s.NewClient(),
 	}
 }
 
-func (balancer *Balancer) Run()  {
+func (balancer *Balancer) Run() {
 	slog.Info("Starting Balancer")
-	
+
 	pods, err := balancer.client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		slog.Error("Errror retrieving pods",  "errro", err.Error())
+		slog.Error("Errror retrieving pods", "errro", err.Error())
 		panic(err.Error())
 	}
-	
+
 	slog.Info(fmt.Sprintf("Pods found: %v", len(pods.Items)))
 }
