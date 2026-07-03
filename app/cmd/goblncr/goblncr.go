@@ -1,13 +1,13 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/art6f/goblncr/internal/app"
 )
 
 func main() {
-	log.Println("Starting...")
+	slog.Info("LB Starting...")
 
 	app.Main()
 }

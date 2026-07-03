@@ -27,9 +27,7 @@ spec:
               cpu: "1"
           ports:
             - containerPort: 8080
-          env:
-            - name: FOO
-              valueFrom:
-                configMapKeyRef:
-                  name: goblncr-config
-                  key: foo
+          
+          envFrom:
+            - configMapRef:
+                name: goblncr-config

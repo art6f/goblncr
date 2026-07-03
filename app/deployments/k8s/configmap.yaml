@@ -4,4 +4,6 @@ metadata:
   name: goblncr-config
   namespace: goblncr
 data:
-  foo: "bar"
+  HTTP_ADDRESS: ""
+  HTTP_PORT: "8080"
+  HTTP_TLS: "false"

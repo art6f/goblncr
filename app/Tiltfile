@@ -6,6 +6,10 @@ allow_k8s_contexts('default')
 # configs
 k8s_yaml([
     DIR_DEPLOYMENTS + "/k8s/namespace.yaml",
+    
+    DIR_DEPLOYMENTS + "/k8s/cluster-role.yaml",
+    DIR_DEPLOYMENTS + "/k8s/cluster-role-binding.yaml",
+
     DIR_DEPLOYMENTS + "/k8s/configmap.yaml",
     DIR_DEPLOYMENTS + "/k8s/deployment.yaml",
     DIR_DEPLOYMENTS + "/k8s/service.yaml",

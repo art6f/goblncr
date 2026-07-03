@@ -1,7 +1,9 @@
 package app
 
+import (
+	"github.com/art6f/goblncr/internal/http"
+)
+
 func Main() {
-	for true {
-		
-	}
+	http.ServeHttp()
 }
