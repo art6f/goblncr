@@ -27,6 +27,7 @@ if [[ "$?" -ne 0 ]]; then
 	docker run --mount type=bind,src=./app,dst=/app golang:1.26 gofmt -w /app
 
 	echo "Please check the changes, commit and push them again"
+	exit 1
 fi
 
-exit 123
+exit 0
