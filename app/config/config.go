@@ -15,7 +15,7 @@ type AppConfig struct {
 func loadDefaults() AppConfig {
 	return AppConfig{
 		Address: "",
-		Port:    80,
+		Port:    8080,
 		UseTls:  false,
 	}
 }
