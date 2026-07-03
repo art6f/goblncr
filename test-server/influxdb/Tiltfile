@@ -13,4 +13,5 @@ k8s_yaml([
 k8s_resource(
   "influxdb",
   port_forwards=8086,
+  labels=['Test-Server']
 )

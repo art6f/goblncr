@@ -13,12 +13,14 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build \
     -ldflags="-s -w" \
     -o /build/goblncr \
-    /build/cmd/goblncr.go
+    /build/cmd/goblncr/goblncr.go
 
 # Run
-FROM gcr.io/distroless/static-debian13
+FROM debian:13-slim
 WORKDIR /app
 
 COPY --from=build /build/goblncr /app/goblncr
-ENTRYPOINT ["/app/goblncr"]
 
+EXPOSE 8080
+
+ENTRYPOINT ["/app/goblncr"]
