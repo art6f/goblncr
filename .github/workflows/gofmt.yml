@@ -1,4 +1,4 @@
-name: gofmt checks
+name: gofmt
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
     branches: [ "**" ]
 
 jobs:
-
-  build:
+  check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
