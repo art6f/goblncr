@@ -19,6 +19,14 @@
 # This sample shows how to prevent push of commits where the log message starts
 # with "WIP" (work in progress).
 
+# check all
 docker run --mount type=bind,src=./app,dst=/app golang:1.26 gofmt -d -e /app
+
+if [[ "$?" -ne 0 ]]; then
+	echo "Not all the files are properly formatted, attempting to reformat them..."
+	docker run --mount type=bind,src=./app,dst=/app golang:1.26 gofmt -w /app
+
+	echo "Please check the changes, commit and push them again"
+fi
 
 exit 123
