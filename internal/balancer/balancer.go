@@ -42,4 +42,5 @@ func (balancer *Balancer) Run() {
 	}
 
 	WatchPods(balancer)
+	
 }
