@@ -14,8 +14,8 @@ func ServeHttp() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Servers is up and running!")
 	})
-
-	balancer := balancer.NewBalancer()
+	
+	balancer := balancer.NewBalancer(&appConfig)
 
 	go balancer.Run()
 
