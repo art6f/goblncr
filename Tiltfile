@@ -1,9 +1,27 @@
 load('ext://dotenv', 'dotenv')
+dotenv('.env')
 
 DIR_ROOT = os.getcwd()
 DIR_DEPLOYMENTS = os.path.join(DIR_ROOT, 'deployments', '/')
 
 allow_k8s_contexts('default')
+
+# generate config from envs
+configmap_subs = local("envsubst < "  + DIR_DEPLOYMENTS + "/k8s/configmap.template.yaml")
+k8s_yaml(configmap_subs)
+
+GO_OS = os.getenv('GOOS')
+GO_ARCH = os.getenv('GOARCH')
+BUILD_CMD='CGO_ENABLED=0 GOOS={} GOARCH={} go build -gcflags="all=-N -l" -o ./build/goblncr-dbg ./cmd/goblncr/goblncr.go' \
+    .format(GO_OS, GO_ARCH)
+
+local_resource(
+    'goblncr-build',
+    cmd=BUILD_CMD,
+    deps=['.'],
+    ignore=['./build/', './deployments/'],
+    labels=['Balancer'],
+)
 
 # configs
 k8s_yaml([
@@ -15,19 +33,6 @@ k8s_yaml([
     DIR_DEPLOYMENTS + "/k8s/deployment.yaml",
     DIR_DEPLOYMENTS + "/k8s/service.yaml",
 ])
-
-# generate config from envs
-dotenv('.env')
-configmap_subs = local("envsubst < "  + DIR_DEPLOYMENTS + "/k8s/configmap.template.yaml")
-k8s_yaml(configmap_subs)
-
-local_resource(
-    'goblncr-build',
-    cmd='CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags="-N -l" -o ./build/goblncr-dbg ./cmd/goblncr/goblncr.go',
-    deps=['.'],
-    ignore=['./build/', './deployments/'],
-    labels=['Balancer'],
-)
 
 docker_build(
     "goblncr:dev",
