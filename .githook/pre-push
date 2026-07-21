@@ -20,11 +20,11 @@
 # with "WIP" (work in progress).
 
 # check all
-docker run --mount type=bind,src=./app,dst=/app golang:1.26 gofmt -d -e /app
+docker run --mount type=bind,src=./,dst=/app golang:1.26 gofmt -d -e /app
 
 if [[ "$?" -ne 0 ]]; then
 	echo "Not all the files are properly formatted, attempting to reformat them..."
-	docker run --mount type=bind,src=./app,dst=/app golang:1.26 gofmt -w /app
+	docker run --mount type=bind,src=./,dst=/app golang:1.26 gofmt -w /app
 
 	echo "Please check the changes, commit and push them again"
 	exit 1
