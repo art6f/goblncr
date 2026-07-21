@@ -1,9 +1,12 @@
-# Run
-FROM debian:13-slim
+#FROM debian:13-slim
+FROM golang:1.26.4
 WORKDIR /app
 
-COPY ./build/goblncr /app/goblncr
+RUN go install github.com/go-delve/delve/cmd/dlv@master
 
-EXPOSE 8080
+COPY ./build/goblncr-dbg /app/goblncr
+COPY ./deployments/docker/start-debug.sh /
 
-ENTRYPOINT ["/app/goblncr"]
+EXPOSE 8080 2345
+
+ENTRYPOINT ["/start-debug.sh"]

@@ -23,7 +23,7 @@ k8s_yaml(configmap_subs)
 
 local_resource(
     'goblncr-build',
-    cmd='CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ./build/goblncr ./cmd/goblncr/goblncr.go',
+    cmd='CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags="-N -l" -o ./build/goblncr-dbg ./cmd/goblncr/goblncr.go',
     deps=['.'],
     ignore=['./build/', './deployments/'],
     labels=['Balancer'],
@@ -33,27 +33,20 @@ docker_build(
     "goblncr:dev",
     DIR_ROOT,
     dockerfile=DIR_DEPLOYMENTS + "/docker/Dockerfile.dev",
-    container_args={
-        'K8S_PODS_SELECTOR': "app=goblncr",
-    },
 )
 
+# Link image to deployment
 k8s_resource(
-    'goblncr',
+    "goblncr",
+    port_forwards=["2345:2345"],
+    labels=['Balancer'],
+
     objects=[
         'goblncr:namespace',
         'goblncr-role:clusterrole',
         'goblncr-global:clusterrolebinding',
         'goblncr-config:configmap',
     ],
-    labels='Resources'
-)
-
-# Link image to deployment
-k8s_resource(
-  "goblncr",
-  port_forwards=8080,
-  labels=['Balancer'],
 )
 
 watch_file("deployments/docker/Dockerfile")

@@ -34,7 +34,5 @@ go.work.sum
 node_modules/
 
 # App
-goblncr
-./build/*
-./build/goblncr
+build/goblncr*
 !build/.gitignore
