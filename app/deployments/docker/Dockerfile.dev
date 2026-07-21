@@ -1,9 +1,0 @@
-# Run
-FROM debian:13-slim
-WORKDIR /app
-
-COPY ./build/goblncr /app/goblncr
-
-EXPOSE 8080
-
-ENTRYPOINT ["/app/goblncr"]

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goblncr
+  namespace: goblncr
+  labels:
+    app: goblncr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goblncr
+  template:
+    metadata:
+      labels:
+        app: goblncr
+    spec:
+      containers:
+        - name: goblncr
+          image: goblncr:dev
+          resources:
+            requests:
+              memory: "512M"
+              cpu: "500m"
+            limits:
+              memory: "1G"
+              cpu: "1"
+          ports:
+            - containerPort: 8080
+          
+          envFrom:
+            - configMapRef:
+                name: goblncr-config
