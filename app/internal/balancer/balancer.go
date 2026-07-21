@@ -2,7 +2,6 @@ package balancer
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/netip"
 
@@ -41,20 +40,20 @@ func (balancer *Balancer) Run() {
 	}
 
 	if len(pods.Items) == 0 {
-		slog.Error("No pods found")
-	} else {
-		slog.Info(fmt.Sprintf("Pods found: %v", len(pods.Items)))
-		podsInfo := ""
-
-		for _, pod := range pods.Items {
-			podsInfo += fmt.Sprintf("\n\t%s (%s)", pod.Status.PodIP, pod.Name)
-
-			if ip, err := netip.ParseAddr(pod.Status.PodIP); err == nil {
-				balancer.pods[pod.Status.PodIP] = ip
-			}
-		}
-		slog.Info("Pods IPs to serve: " + podsInfo)
+		panic("No pods found")
 	}
 
-	InformerWatchPods(balancer)
+//	slog.Info(fmt.Sprintf("Pods found: %v", len(pods.Items)))
+//	podsInfo := ""
+//
+//	for _, pod := range pods.Items {
+//		podsInfo += fmt.Sprintf("\n\t%s (%s)", pod.Status.PodIP, pod.Name)
+//
+//		if ip, err := netip.ParseAddr(pod.Status.PodIP); err == nil {
+//			balancer.pods[pod.Status.PodIP] = ip
+//		}
+//	}
+//	slog.Info("Pods IPs to serve: " + podsInfo)
+
+	WatchPods(balancer)
 }

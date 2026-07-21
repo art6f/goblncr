@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func InformerWatchPods(balancer *Balancer) {
+func WatchPods(balancer *Balancer) {
 	factory := informers.NewSharedInformerFactoryWithOptions(
 		balancer.Client,
 		5*time.Second,
@@ -46,8 +46,6 @@ func InformerWatchPods(balancer *Balancer) {
 
 			if oldPod.Name != newPod.Name {
 				slog.Info(fmt.Sprintf("Pod name has changed '%s' -> '%s'", oldPod.Name, newPod.Name))
-
-				//balancer.pods.
 			}
 
 			if newPod.Status.PodIP != oldPod.Status.PodIP {

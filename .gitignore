@@ -3,6 +3,7 @@
 
 # IDEs
 .idea
+.vscode/launch.json
 
 # Binaries for programs and plugins
 *.exe
