@@ -29,7 +29,6 @@ local_resource(
     labels=['Balancer'],
 )
 
-# image build (no push)
 docker_build(
     "goblncr:dev",
     DIR_ROOT,
@@ -37,6 +36,17 @@ docker_build(
     container_args={
         'K8S_PODS_SELECTOR': "app=goblncr",
     },
+)
+
+k8s_resource(
+    'goblncr',
+    objects=[
+        'goblncr:namespace',
+        'goblncr-role:clusterrole',
+        'goblncr-global:clusterrolebinding',
+        'goblncr-config:configmap',
+    ],
+    labels='Resources'
 )
 
 # Link image to deployment

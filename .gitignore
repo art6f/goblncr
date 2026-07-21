@@ -31,10 +31,10 @@ go.work.sum
 # env file
 .env
 
-
 node_modules/
 
 # App
-app/goblncr
-app/build/*
-!app/build/.gitignore
+goblncr
+./build/*
+./build/goblncr
+!build/.gitignore
