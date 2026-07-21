@@ -43,17 +43,17 @@ func (balancer *Balancer) Run() {
 		panic("No pods found")
 	}
 
-//	slog.Info(fmt.Sprintf("Pods found: %v", len(pods.Items)))
-//	podsInfo := ""
-//
-//	for _, pod := range pods.Items {
-//		podsInfo += fmt.Sprintf("\n\t%s (%s)", pod.Status.PodIP, pod.Name)
-//
-//		if ip, err := netip.ParseAddr(pod.Status.PodIP); err == nil {
-//			balancer.pods[pod.Status.PodIP] = ip
-//		}
-//	}
-//	slog.Info("Pods IPs to serve: " + podsInfo)
+	//	slog.Info(fmt.Sprintf("Pods found: %v", len(pods.Items)))
+	//	podsInfo := ""
+	//
+	//	for _, pod := range pods.Items {
+	//		podsInfo += fmt.Sprintf("\n\t%s (%s)", pod.Status.PodIP, pod.Name)
+	//
+	//		if ip, err := netip.ParseAddr(pod.Status.PodIP); err == nil {
+	//			balancer.pods[pod.Status.PodIP] = ip
+	//		}
+	//	}
+	//	slog.Info("Pods IPs to serve: " + podsInfo)
 
 	WatchPods(balancer)
 }

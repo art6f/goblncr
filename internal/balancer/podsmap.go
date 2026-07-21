@@ -4,7 +4,6 @@ import "net/netip"
 
 type PodsMap map[string]netip.Addr
 
-
 // Add an IP address for the Pod by name
 func (podsMap PodsMap) AddAddress(name string, ip string) error {
 	return nil
@@ -30,10 +29,9 @@ func (podsMap PodsMap) DropAddress(ip string) error {
 	return nil
 }
 
-
 func (podsMap PodsMap) hasPod(name string) bool {
 	_, ok := podsMap[name]
-	
+
 	return ok
 }
 
