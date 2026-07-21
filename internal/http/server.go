@@ -15,7 +15,7 @@ func ServeHttp() {
 		fmt.Fprint(w, "Servers is up and running!")
 	})
 
-	balancer := balancer.NewBalancer()
+	balancer := balancer.NewBalancer(&appConfig)
 
 	go balancer.Run()
 

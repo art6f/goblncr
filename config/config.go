@@ -7,16 +7,19 @@ import (
 )
 
 type AppConfig struct {
-	Address string
-	Port    int
-	UseTls  bool
+	Address      string
+	Port         int
+	UseTls       bool
+	Namespace    string
+	PodsSelector string
 }
 
 func loadDefaults() AppConfig {
 	return AppConfig{
-		Address: "",
-		Port:    8080,
-		UseTls:  false,
+		Address:   "",
+		Port:      8080,
+		UseTls:    false,
+		Namespace: "default",
 	}
 }
 
@@ -27,6 +30,7 @@ func GetConfig() AppConfig {
 	if !loaded {
 		config = loadDefaults()
 
+		// network level
 		if address, ok := os.LookupEnv("HTTP_ADDRESS"); ok {
 			config.Address = address
 			slog.Info("Resolved", "address", address)
@@ -46,6 +50,28 @@ func GetConfig() AppConfig {
 			slog.Info("Resolved", "TSL", config.UseTls)
 		} else {
 			slog.Warn("Unable to resolve TLS flag, failing back to", "TSL", config.UseTls)
+		}
+
+		// k8s selectors
+		configErr := false
+		if namespace := os.Getenv("K8S_NAMESPACE"); len(namespace) > 0 {
+			config.Namespace = namespace
+			slog.Info("Resolved", "namespace", namespace)
+		} else {
+			slog.Error("Unable to resolve namespace", "K8S_NAMESPACE", nil)
+			configErr = true
+		}
+
+		if selector := os.Getenv("K8S_PODS_SELECTOR"); len(selector) > 0 {
+			config.PodsSelector = selector
+			slog.Info("Resolved", "selector", selector)
+		} else {
+			slog.Error("Unable to resolve selector ", "K8S_PODS_SELECTOR", nil)
+			configErr = true
+		}
+
+		if configErr {
+			panic("Unable to start load config due to errors")
 		}
 
 		loaded = true
