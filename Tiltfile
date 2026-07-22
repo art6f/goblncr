@@ -19,7 +19,7 @@ local_resource(
     'goblncr-build',
     cmd=BUILD_CMD,
     deps=['.'],
-    ignore=['./build/', './deployments/'],
+    ignore=['build/', 'deployments/', '.vscode'],
     labels=['Balancer'],
 )
 
