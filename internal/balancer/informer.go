@@ -29,11 +29,27 @@ func WatchPods(balancer *Balancer) {
 	_, err := podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			key, err := cache.MetaNamespaceKeyFunc(obj)
-			if err == nil {
-				log.Printf("Pod ADDED: %s", key)
+			if err != nil {
+				log.Printf("Pod error resolving add cache: %s", err.Error())
+				return
 			}
+
+			pod, ok := obj.(*corev1.Pod)
+			if !ok {
+				return
+			}
+
+			slog.Info(fmt.Sprintf("New pod added: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
+
+			balancer.pods.Add(pod)
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
+			key, err := cache.MetaNamespaceKeyFunc(newObj)
+			if err != nil {
+				log.Printf("Pod error resolving change cache: %s", err.Error())
+				return
+			}
+
 			oldPod, ok := oldObj.(*corev1.Pod)
 			if !ok {
 				return
@@ -44,28 +60,33 @@ func WatchPods(balancer *Balancer) {
 				return
 			}
 
-			if oldPod.Name != newPod.Name {
-				slog.Info(fmt.Sprintf("Pod name has changed '%s' -> '%s'", oldPod.Name, newPod.Name))
-			}
-
-			if newPod.Status.PodIP != oldPod.Status.PodIP {
-
-			}
-
-			fmt.Printf("Pod change\nFrom\t%v: %v\nFrom\t%v: %v\n", oldPod.Name, oldPod.Status.PodIP, newPod.Name, newPod.Status.PodIP)
-
-			key, err := cache.MetaNamespaceKeyFunc(newObj)
-			if err == nil {
-				log.Printf("Pod UPDATED: %s", key)
+			if oldPod.Status.Phase != newPod.Status.Phase {
+				slog.Info(fmt.Sprintf("Pod '%s' phase has changed '%s' -> '%s'", key, oldPod.Status.Phase, newPod.Status.Phase))
+				balancer.pods.Update(newPod)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
-			if err == nil {
-				log.Printf("Pod DELETED: %s", key)
+			if err != nil {
+				log.Printf("Pod error resolving delete cache: %s", err.Error())
+				return
+			}
+
+			pod, ok := obj.(*corev1.Pod)
+			if !ok {
+				return
+			}
+
+			slog.Info(fmt.Sprintf("Pod was deleted: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
+
+			balancer.pods.Delete(pod)
+
+			if len(balancer.pods) == 0 {
+				slog.Warn("No more pods left!")
 			}
 		},
 	})
+
 	if err != nil {
 		fmt.Printf("Error encountered: %v\n", err)
 		return
