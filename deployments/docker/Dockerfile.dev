@@ -1,5 +1,5 @@
-#FROM debian:13-slim
-FROM golang:1.26.4
+FROM golang:1.26.5
+
 WORKDIR /app
 
 RUN go install github.com/go-delve/delve/cmd/dlv@master
