@@ -4,6 +4,7 @@
 # IDEs
 .idea
 .vscode/launch.json
+.continue
 
 # Binaries for programs and plugins
 *.exe

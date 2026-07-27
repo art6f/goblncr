@@ -44,3 +44,13 @@ func (balancer *Balancer) Run() {
 	WatchPods(balancer)
 	
 }
+
+func (balancer *Balancer) GetActivePodsIp() []string {
+	var podList []string
+	for _, podData := range balancer.pods {
+		if podData.Ready {
+			podList = append(podList, podData.Ip.String())
+		}
+	}
+	return podList
+}
