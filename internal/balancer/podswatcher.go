@@ -19,9 +19,9 @@ func WatchPods(balancer *Balancer) {
 	factory := informers.NewSharedInformerFactoryWithOptions(
 		balancer.Client,
 		5*time.Second,
-		informers.WithNamespace(balancer.Config.Namespace),
+		informers.WithNamespace(balancer.Config.Target.Namespace),
 		informers.WithTweakListOptions(func(lo *metav1.ListOptions) {
-			lo.LabelSelector = balancer.Config.PodsSelector
+			lo.LabelSelector = balancer.Config.Target.Selector
 		}),
 	)
 	podInformer := factory.Core().V1().Pods().Informer()
@@ -39,7 +39,7 @@ func WatchPods(balancer *Balancer) {
 				return
 			}
 
-			slog.Info(fmt.Sprintf("New pod added: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
+			slog.Info(fmt.Sprintf("[WATCHER] New pod added: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
 
 			balancer.pods.Add(pod)
 		},
@@ -61,7 +61,7 @@ func WatchPods(balancer *Balancer) {
 			}
 
 			if oldPod.Status.Phase != newPod.Status.Phase {
-				slog.Info(fmt.Sprintf("Pod '%s' phase has changed '%s' -> '%s'", key, oldPod.Status.Phase, newPod.Status.Phase))
+				slog.Info(fmt.Sprintf("[WATCHER] Pod '%s' phase has changed '%s' -> '%s'", key, oldPod.Status.Phase, newPod.Status.Phase))
 				balancer.pods.Update(newPod)
 			}
 		},
@@ -77,7 +77,7 @@ func WatchPods(balancer *Balancer) {
 				return
 			}
 
-			slog.Info(fmt.Sprintf("Pod was deleted: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
+			slog.Info(fmt.Sprintf("[WATCHER] Pod was deleted: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
 
 			balancer.pods.Delete(pod)
 

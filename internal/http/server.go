@@ -18,16 +18,13 @@ import (
 //go:embed error_pages/*.html
 var templatesFS embed.FS
 
-func ServeHttp() {
-	appConfig := config.GetConfig()
+func ServeHttp(config *config.AppConfig, balancer *balancer.Balancer) {
 	template.Must(
 		template.ParseFS(
 			templatesFS,
 			"error_pages/*.html",
 		),
 	)
-
-	balancer := balancer.NewBalancer(&appConfig)
 
 	go balancer.Run()
 
@@ -41,13 +38,13 @@ func ServeHttp() {
 
 		selectedPod := pods[rand.Intn(len(pods))]
 
-		proxyURL, _ := url.Parse(fmt.Sprintf("http://%s", selectedPod))
+		proxyURL, _ := url.Parse(fmt.Sprintf("http://%s:%d", selectedPod, config.Target.Port))
 		proxy := httputil.NewSingleHostReverseProxy(proxyURL)
 		proxy.ErrorHandler = errorHandler
 		proxy.ServeHTTP(w, r)
 	})
 
-	http.ListenAndServe(fmt.Sprintf("%s:%d", appConfig.Address, appConfig.Port), nil)
+	http.ListenAndServe(fmt.Sprintf("%s:%d", config.Server.Address, config.Server.Port), nil)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, e error) {

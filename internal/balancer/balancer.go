@@ -26,10 +26,10 @@ func NewBalancer(config *config.AppConfig) *Balancer {
 
 func (balancer *Balancer) Run() {
 	slog.Info("Starting Balancer...")
-	slog.Info("Querying pods", "namespace", balancer.Config.Namespace, "label", balancer.Config.PodsSelector)
+	slog.Info("Querying pods", "namespace", balancer.Config.Target.Namespace, "label", balancer.Config.Target.Selector)
 
-	pods, err := balancer.Client.CoreV1().Pods(balancer.Config.Namespace).List(context.TODO(), metav1.ListOptions{
-		LabelSelector: balancer.Config.PodsSelector,
+	pods, err := balancer.Client.CoreV1().Pods(balancer.Config.Target.Namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: balancer.Config.Target.Selector,
 	})
 
 	if err != nil {

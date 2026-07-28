@@ -6,20 +6,35 @@ import (
 	"strconv"
 )
 
+type ServerConfig struct {
+	Address string
+	Port    int
+	Tls     bool
+}
+
+type TargetConfig struct {
+	Namespace string
+	Selector  string
+	Port      int
+}
+
 type AppConfig struct {
-	Address      string
-	Port         int
-	UseTls       bool
-	Namespace    string
-	PodsSelector string
+	Server ServerConfig
+	Target TargetConfig
 }
 
 func loadDefaults() AppConfig {
 	return AppConfig{
-		Address:   "",
-		Port:      8080,
-		UseTls:    false,
-		Namespace: "default",
+		ServerConfig{
+			Address: "",
+			Port:    8080,
+			Tls:     false,
+		},
+		TargetConfig{
+			Namespace: "default",
+			Selector:  "",
+			Port:      80,
+		},
 	}
 }
 
@@ -30,44 +45,51 @@ func GetConfig() AppConfig {
 	if !loaded {
 		config = loadDefaults()
 
-		// network level
-		if address, ok := os.LookupEnv("HTTP_ADDRESS"); ok {
-			config.Address = address
-			slog.Info("Resolved", "address", address)
+		// LB Sever Settings
+		if address, ok := os.LookupEnv("BALANCER_ADDRESS"); ok {
+			config.Server.Address = address
+			slog.Info("[BALANCER] Resolved", "address", address)
 		} else {
-			slog.Warn("Unable to resolve address, failing back to empty string")
+			slog.Warn("[BALANCER] Unable to resolve address, failing back to empty string")
 		}
 
-		if port, err := strconv.Atoi(os.Getenv("HTTP_PORT")); err == nil {
-			config.Port = port
-			slog.Info("Resolved", "port", config.Port)
+		if port, err := strconv.Atoi(os.Getenv("BALANCER_PORT")); err == nil {
+			config.Server.Port = port
+			slog.Info("[BALANCER] Resolved", "port", config.Server.Port)
 		} else {
-			slog.Warn("Unable to resolve port, failing back to", "port", config.Port)
+			slog.Warn("[BALANCER] Unable to resolve port, failing back to", "port", config.Server.Port)
 		}
 
-		if tls, err := strconv.ParseBool(os.Getenv("HTTP_TLS")); err == nil {
-			config.UseTls = tls
-			slog.Info("Resolved", "TSL", config.UseTls)
+		if tls, err := strconv.ParseBool(os.Getenv("BALANCER_TLS")); err == nil {
+			config.Server.Tls = tls
+			slog.Info("[BALANCER] Resolved", "TSL", config.Server.Tls)
 		} else {
-			slog.Warn("Unable to resolve TLS flag, failing back to", "TSL", config.UseTls)
+			slog.Warn("[BALANCER] Unable to resolve TLS flag, failing back to", "TSL", config.Server.Tls)
 		}
 
-		// k8s selectors
+		// Target Settings
 		configErr := false
-		if namespace := os.Getenv("K8S_NAMESPACE"); len(namespace) > 0 {
-			config.Namespace = namespace
-			slog.Info("Resolved", "namespace", namespace)
+		if namespace := os.Getenv("TARGET_NAMESPACE"); len(namespace) > 0 {
+			config.Target.Namespace = namespace
+			slog.Info("[TARGET] Resolved", "namespace", namespace)
 		} else {
-			slog.Error("Unable to resolve namespace", "K8S_NAMESPACE", nil)
+			slog.Error("[TARGET] Unable to resolve namespace", "TARGET_NAMESPACE", nil)
 			configErr = true
 		}
 
-		if selector := os.Getenv("K8S_PODS_SELECTOR"); len(selector) > 0 {
-			config.PodsSelector = selector
-			slog.Info("Resolved", "selector", selector)
+		if selector := os.Getenv("TARGET_SELECTOR"); len(selector) > 0 {
+			config.Target.Selector = selector
+			slog.Info("[TARGET] Resolved", "selector", selector)
 		} else {
-			slog.Error("Unable to resolve selector ", "K8S_PODS_SELECTOR", nil)
+			slog.Error("[TARGET] Unable to resolve selector ", "TARGET_SELECTOR", nil)
 			configErr = true
+		}
+
+		if port, err := strconv.Atoi(os.Getenv("TARGET_PORT")); err == nil {
+			config.Target.Port = port
+			slog.Info("[TARGET] Resolved", "port", config.Target.Port)
+		} else {
+			slog.Warn("[TARGET] Unable to resolve port, failing back to", "port", config.Target.Port)
 		}
 
 		if configErr {
