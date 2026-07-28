@@ -42,7 +42,6 @@ func (balancer *Balancer) Run() {
 	}
 
 	WatchPods(balancer)
-	
 }
 
 func (balancer *Balancer) GetActivePodsIp() []string {

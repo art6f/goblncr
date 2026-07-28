@@ -53,14 +53,14 @@ func ServeHttp() {
 func errorHandler(w http.ResponseWriter, r *http.Request, e error) {
 	slog.Error("Unable to handle request: " + e.Error())
 
+	statusCode := 500
+	title, description := "Error", "Unknow server error"
+
 	tmpl, err := template.ParseFS(templatesFS, "error_pages/error_template.html")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("%d Error", statusCode), statusCode)
 		return
 	}
-
-	statusCode := 500
-	title, description := "Error", "Unknow server error"
 
 	if r.Response != nil {
 		statusCode = r.Response.StatusCode
