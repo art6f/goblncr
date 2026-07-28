@@ -40,7 +40,14 @@ func ServeHttp(config *config.AppConfig, balancer *balancer.Balancer) {
 
 		proxyURL, _ := url.Parse(fmt.Sprintf("http://%s:%d", selectedPod, config.Target.Port))
 		proxy := httputil.NewSingleHostReverseProxy(proxyURL)
+
+		// handlers/hooks
 		proxy.ErrorHandler = errorHandler
+		proxy.ModifyResponse = func(resp *http.Response) error {
+			slog.Info(fmt.Sprintf("%d - %s%s", resp.StatusCode, proxyURL.String(), r.RequestURI))
+			return nil
+		}
+
 		proxy.ServeHTTP(w, r)
 	})
 
