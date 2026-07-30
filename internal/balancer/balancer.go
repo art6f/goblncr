@@ -2,9 +2,12 @@ package balancer
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+	"net/http"
 
 	"github.com/art6f/goblncr/config"
+	"github.com/art6f/goblncr/internal/balancer/strategies"
 	"github.com/art6f/goblncr/internal/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -14,6 +17,7 @@ type Balancer struct {
 	Client *kubernetes.Clientset
 	Config *config.AppConfig
 	pods   PodsMap
+	strategy strategies.Strategy
 }
 
 func NewBalancer(config *config.AppConfig) *Balancer {
@@ -21,6 +25,7 @@ func NewBalancer(config *config.AppConfig) *Balancer {
 		Client: k8s.NewClient(),
 		Config: config,
 		pods:   make(PodsMap, 0),
+		strategy: strategies.NewRandomStrategy(),
 	}
 }
 
@@ -52,4 +57,14 @@ func (balancer *Balancer) GetActivePodsIp() []string {
 		}
 	}
 	return podList
+}
+
+func (balancer *Balancer) SelectServer(_ *http.Request) (string, error) {
+	activePods := balancer.GetActivePodsIp()
+	
+	if len(activePods) == 0 {
+		return "", errors.New("No pods available")
+	}
+	
+	return balancer.strategy.Select(activePods), nil
 }
