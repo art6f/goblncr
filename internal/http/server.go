@@ -2,11 +2,9 @@ package http
 
 import (
 	"embed"
-	"errors"
 	"fmt"
 	"html/template"
 	"log/slog"
-	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -29,14 +27,12 @@ func ServeHttp(config *config.AppConfig, balancer *balancer.Balancer) {
 	go balancer.Run()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		pods := balancer.GetActivePodsIp()
+		selectedPod, err := balancer.SelectServer(r)
 
-		if len(pods) == 0 {
-			errorHandler(w, r, errors.New("No services available"))
+		if err != nil {
+			errorHandler(w, r, err)
 			return
 		}
-
-		selectedPod := pods[rand.Intn(len(pods))]
 
 		proxyURL, _ := url.Parse(fmt.Sprintf("http://%s:%d", selectedPod, config.Target.Port))
 		proxy := httputil.NewSingleHostReverseProxy(proxyURL)

@@ -21,13 +21,9 @@ func (podsMap PodsMap) Add(pod *corev1.Pod) error {
 		return errors.New("Unable to add pod: pod has no name")
 	}
 
-	if len(pod.Status.PodIP) == 0 {
-		return errors.New("Unable to add pod: pod has no IP address")
-	}
-
-	ip, err := netip.ParseAddr(pod.Status.PodIP)
+	ip, err := podsMap.getPodIp(pod)
 	if err != nil {
-		return fmt.Errorf("Unable to add pod - IP parsing failed: %s", err.Error())
+		return err
 	}
 
 	podsMap[pod.Name] = &PodInfo{
@@ -36,6 +32,18 @@ func (podsMap PodsMap) Add(pod *corev1.Pod) error {
 	}
 
 	return nil
+}
+
+func (podsMap PodsMap) getPodIp(pod *corev1.Pod) (netip.Addr, error) {
+	if len(pod.Status.PodIP) == 0 {
+		return netip.Addr{}, nil
+	}
+	parsedIp, err := netip.ParseAddr(pod.Status.PodIP)
+	if err != nil {
+		return netip.Addr{}, fmt.Errorf("Unable to add pod - IP parsing failed: %s", err.Error())
+	}
+
+	return parsedIp, nil
 }
 
 func (podsMap PodsMap) Update(pod *corev1.Pod) error {
@@ -48,6 +56,12 @@ func (podsMap PodsMap) Update(pod *corev1.Pod) error {
 		return errors.New("Unable to update pod: unknown")
 	}
 
+	ip, err := podsMap.getPodIp(pod)
+	if err != nil {
+		return err
+	}
+
+	entry.Ip = ip
 	entry.Ready = podsMap.isReadyPhase(pod.Status.Phase)
 
 	return nil
@@ -70,23 +84,3 @@ func (podsMap PodsMap) Delete(pod *corev1.Pod) error {
 func (podsMap PodsMap) isReadyPhase(phase corev1.PodPhase) bool {
 	return phase == corev1.PodRunning
 }
-
-//// Delete a Pod by an associated IP address
-//func (podsMap PodsMap) DropByName(ip name) error {
-//	return nil
-//}
-//
-//// Delete a Pod by an associated IP address
-//func (podsMap PodsMap) DropByAddress(ip string) error {
-//	return nil
-//}
-//
-//func (podsMap PodsMap) hasPod(name string) bool {
-//	_, ok := podsMap[name]
-//
-//	return ok
-//}
-//
-//func (podsMap PodsMap) hasIp(ip string) bool {
-//	return false
-//}
