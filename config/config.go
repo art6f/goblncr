@@ -4,27 +4,30 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 )
 
 type ServerConfig struct {
-	Address string
-	Port    int
-	Tls     bool
+	Address string `yaml:"address"`
+	Port    int    `yaml:"port"`
+	Tls     bool   `yaml:"tls"`
 }
 
 type TargetConfig struct {
-	Namespace string
-	Selector  string
-	Port      int
+	Namespace string `yaml:"namespace"`
+	Selector  string `yaml:"selector"`
+	Port      int    `yaml:"port"`
 }
 
 type AppConfig struct {
-	Server ServerConfig
-	Target TargetConfig
+	Server ServerConfig `yaml:"server"`
+	Target TargetConfig `yaml:"target"`
 }
 
-func loadDefaults() AppConfig {
-	return AppConfig{
+func loadConfig() AppConfig {
+	// defaults
+	config := AppConfig{
 		ServerConfig{
 			Address: "",
 			Port:    8080,
@@ -36,68 +39,61 @@ func loadDefaults() AppConfig {
 			Port:      80,
 		},
 	}
-}
 
-var loaded bool = false
-var config AppConfig
+	configData, errFile := os.ReadFile("config.yaml")
+	if errFile != nil {
+		slog.Error("Config file not found, using default")
+	}
 
-func GetConfig() AppConfig {
-	if !loaded {
-		config = loadDefaults()
-
-		// LB Sever Settings
-		if address, ok := os.LookupEnv("BALANCER_ADDRESS"); ok {
-			config.Server.Address = address
-			slog.Info("[BALANCER] Resolved", "address", address)
-		} else {
-			slog.Warn("[BALANCER] Unable to resolve address, failing back to empty string")
-		}
-
-		if port, err := strconv.Atoi(os.Getenv("BALANCER_PORT")); err == nil {
-			config.Server.Port = port
-			slog.Info("[BALANCER] Resolved", "port", config.Server.Port)
-		} else {
-			slog.Warn("[BALANCER] Unable to resolve port, failing back to", "port", config.Server.Port)
-		}
-
-		if tls, err := strconv.ParseBool(os.Getenv("BALANCER_TLS")); err == nil {
-			config.Server.Tls = tls
-			slog.Info("[BALANCER] Resolved", "TSL", config.Server.Tls)
-		} else {
-			slog.Warn("[BALANCER] Unable to resolve TLS flag, failing back to", "TSL", config.Server.Tls)
-		}
-
-		// Target Settings
-		configErr := false
-		if namespace := os.Getenv("TARGET_NAMESPACE"); len(namespace) > 0 {
-			config.Target.Namespace = namespace
-			slog.Info("[TARGET] Resolved", "namespace", namespace)
-		} else {
-			slog.Error("[TARGET] Unable to resolve namespace", "TARGET_NAMESPACE", nil)
-			configErr = true
-		}
-
-		if selector := os.Getenv("TARGET_SELECTOR"); len(selector) > 0 {
-			config.Target.Selector = selector
-			slog.Info("[TARGET] Resolved", "selector", selector)
-		} else {
-			slog.Error("[TARGET] Unable to resolve selector ", "TARGET_SELECTOR", nil)
-			configErr = true
-		}
-
-		if port, err := strconv.Atoi(os.Getenv("TARGET_PORT")); err == nil {
-			config.Target.Port = port
-			slog.Info("[TARGET] Resolved", "port", config.Target.Port)
-		} else {
-			slog.Warn("[TARGET] Unable to resolve port, failing back to", "port", config.Target.Port)
-		}
-
-		if configErr {
-			panic("Unable to start load config due to errors")
-		}
-
-		loaded = true
+	if err := yaml.Unmarshal(configData, &config); err != nil {
+		slog.Error("Unable to load config file, using default")
 	}
 
 	return config
+}
+
+var config AppConfig
+
+func GetConfig() AppConfig {
+	config = loadConfig()
+	updateConfigFromEnv(&config)
+
+	slog.Info("[BALANCER] Config", "address", config.Server.Address, "port", config.Server.Port, "TSL", config.Server.Tls)
+	slog.Info("[TARGET] Config", "namespace", config.Target.Namespace, "selector", config.Target.Selector, "port", config.Target.Port)
+	
+	if len(config.Target.Selector) == 0 || len(config.Target.Namespace) == 0 {
+		panic("Target Namespace and Selector cannot be empty")
+	}
+	
+	return config
+}
+
+func updateConfigFromEnv(config *AppConfig) {
+	slog.Info("Checking environment variables for addition config overrides...")
+
+	// LB Sever Settings
+	if address, ok := os.LookupEnv("BALANCER_ADDRESS"); ok {
+		config.Server.Address = address
+	}
+
+	if port, err := strconv.Atoi(os.Getenv("BALANCER_PORT")); err == nil {
+		config.Server.Port = port
+	}
+
+	if tls, err := strconv.ParseBool(os.Getenv("BALANCER_TLS")); err == nil {
+		config.Server.Tls = tls
+	}
+
+	// Targets
+	if namespace := os.Getenv("TARGET_NAMESPACE"); len(namespace) > 0 {
+		config.Target.Namespace = namespace
+	}
+
+	if selector := os.Getenv("TARGET_SELECTOR"); len(selector) > 0 {
+		config.Target.Selector = selector
+	}
+
+	if port, err := strconv.Atoi(os.Getenv("TARGET_PORT")); err == nil {
+		config.Target.Port = port
+	}
 }
