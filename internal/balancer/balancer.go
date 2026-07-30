@@ -14,17 +14,17 @@ import (
 )
 
 type Balancer struct {
-	Client *kubernetes.Clientset
-	Config *config.AppConfig
-	pods   PodsMap
+	Client   *kubernetes.Clientset
+	Config   *config.AppConfig
+	pods     PodsMap
 	strategy strategies.Strategy
 }
 
 func NewBalancer(config *config.AppConfig) *Balancer {
 	return &Balancer{
-		Client: k8s.NewClient(),
-		Config: config,
-		pods:   make(PodsMap, 0),
+		Client:   k8s.NewClient(),
+		Config:   config,
+		pods:     make(PodsMap, 0),
 		strategy: strategies.NewRandomStrategy(),
 	}
 }
@@ -61,10 +61,10 @@ func (balancer *Balancer) GetActivePodsIp() []string {
 
 func (balancer *Balancer) SelectServer(_ *http.Request) (string, error) {
 	activePods := balancer.GetActivePodsIp()
-	
+
 	if len(activePods) == 0 {
 		return "", errors.New("No pods available")
 	}
-	
+
 	return balancer.strategy.Select(activePods), nil
 }

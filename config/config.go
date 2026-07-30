@@ -60,11 +60,11 @@ func GetConfig() AppConfig {
 
 	slog.Info("[BALANCER] Config", "address", config.Server.Address, "port", config.Server.Port, "TSL", config.Server.Tls)
 	slog.Info("[TARGET] Config", "namespace", config.Target.Namespace, "selector", config.Target.Selector, "port", config.Target.Port)
-	
+
 	if len(config.Target.Selector) == 0 || len(config.Target.Namespace) == 0 {
 		panic("Target Namespace and Selector cannot be empty")
 	}
-	
+
 	return config
 }
 
