@@ -9,9 +9,10 @@ import (
 )
 
 type ServerConfig struct {
-	Address string `yaml:"address"`
-	Port    int    `yaml:"port"`
-	Tls     bool   `yaml:"tls"`
+	Address  string `yaml:"address"`
+	Port     int    `yaml:"port"`
+	Tls      bool   `yaml:"tls"`
+	Strategy string `yaml:"strategy"`
 }
 
 type TargetConfig struct {
@@ -58,7 +59,12 @@ func GetConfig() AppConfig {
 	config = loadConfig()
 	updateConfigFromEnv(&config)
 
-	slog.Info("[BALANCER] Config", "address", config.Server.Address, "port", config.Server.Port, "TSL", config.Server.Tls)
+	slog.Info("[BALANCER] Config",
+		"address", config.Server.Address,
+		"port", config.Server.Port,
+		"TSL", config.Server.Tls,
+		"strategy", config.Server.Strategy)
+
 	slog.Info("[TARGET] Config", "namespace", config.Target.Namespace, "selector", config.Target.Selector, "port", config.Target.Port)
 
 	if len(config.Target.Selector) == 0 || len(config.Target.Namespace) == 0 {
