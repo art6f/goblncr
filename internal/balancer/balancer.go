@@ -56,18 +56,8 @@ func (balancer *Balancer) Run() {
 	k8s.WatchPods(balancer.Config.Target.Namespace, balancer.Config.Target.Selector, balancer.Client, &balancer.pods)
 }
 
-func (balancer *Balancer) GetActivePodsIp() []string {
-	var podList []string
-	for _, podData := range balancer.pods {
-		if podData.Ready {
-			podList = append(podList, podData.Ip.String())
-		}
-	}
-	return podList
-}
-
 func (balancer *Balancer) SelectServer(_ *http.Request) (string, error) {
-	activePods := balancer.GetActivePodsIp()
+	activePods := balancer.pods.GetActivePodsIp()
 
 	if len(activePods) == 0 {
 		return "", errors.New("No pods available")
