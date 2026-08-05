@@ -1,5 +1,6 @@
 #!/bin/sh
 
+echo "Checking the file gofmt..."
 docker run --mount type=bind,src=./,dst=/app golang:1.26 gofmt -d -e /app
 
 if [[ "$?" -ne 0 ]]; then
