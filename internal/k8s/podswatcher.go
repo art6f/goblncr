@@ -1,4 +1,4 @@
-package balancer
+package k8s
 
 import (
 	"fmt"
@@ -12,16 +12,17 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 )
 
-func WatchPods(balancer *Balancer) {
+func WatchPods(namespace, selector string, client *kubernetes.Clientset, pods *PodsMap) {
 	factory := informers.NewSharedInformerFactoryWithOptions(
-		balancer.Client,
+		client,
 		5*time.Second,
-		informers.WithNamespace(balancer.Config.Target.Namespace),
+		informers.WithNamespace(namespace),
 		informers.WithTweakListOptions(func(lo *metav1.ListOptions) {
-			lo.LabelSelector = balancer.Config.Target.Selector
+			lo.LabelSelector = selector
 		}),
 	)
 	podInformer := factory.Core().V1().Pods().Informer()
@@ -41,7 +42,7 @@ func WatchPods(balancer *Balancer) {
 
 			slog.Info(fmt.Sprintf("[WATCHER] New pod added: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
 
-			balancer.pods.Add(pod)
+			pods.Add(pod)
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			key, err := cache.MetaNamespaceKeyFunc(newObj)
@@ -62,7 +63,7 @@ func WatchPods(balancer *Balancer) {
 
 			if oldPod.Status.Phase != newPod.Status.Phase {
 				slog.Info(fmt.Sprintf("[WATCHER] Pod '%s' phase has changed '%s' -> '%s'", key, oldPod.Status.Phase, newPod.Status.Phase))
-				balancer.pods.Update(newPod)
+				pods.Update(newPod)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -79,9 +80,9 @@ func WatchPods(balancer *Balancer) {
 
 			slog.Info(fmt.Sprintf("[WATCHER] Pod was deleted: %s - %s @ %s", key, pod.Name, pod.Status.PodIP))
 
-			balancer.pods.Delete(pod)
+			pods.Delete(pod)
 
-			if len(balancer.pods) == 0 {
+			if len(*pods) == 0 {
 				slog.Warn("No more pods left!")
 			}
 		},

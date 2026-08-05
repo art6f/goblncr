@@ -5,14 +5,19 @@ import (
 	"os"
 	"strconv"
 
-	"gopkg.in/yaml.v3"
+	"github.com/art6f/goblncr/internal/balancer/strategies"
+	"go.yaml.in/yaml/v3"
 )
 
 type ServerConfig struct {
-	Address  string `yaml:"address"`
-	Port     int    `yaml:"port"`
-	Tls      bool   `yaml:"tls"`
-	Strategy string `yaml:"strategy"`
+	Address  string                       `yaml:"address"`
+	Port     int                          `yaml:"port"`
+	Tls      bool                         `yaml:"tls"`
+	Strategy strategies.BalancingStrategy `yaml:"strategy"`
+}
+
+type HashringConfig struct {
+	Vnodes int `yaml:"vnodes"`
 }
 
 type TargetConfig struct {
@@ -22,22 +27,27 @@ type TargetConfig struct {
 }
 
 type AppConfig struct {
-	Server ServerConfig `yaml:"server"`
-	Target TargetConfig `yaml:"target"`
+	Server   ServerConfig   `yaml:"server"`
+	Target   TargetConfig   `yaml:"target"`
+	Hashring HashringConfig `yaml:"hashring"`
 }
 
 func loadConfig() AppConfig {
 	// defaults
 	config := AppConfig{
 		ServerConfig{
-			Address: "",
-			Port:    8080,
-			Tls:     false,
+			Address:  "",
+			Port:     8080,
+			Tls:      false,
+			Strategy: strategies.StrategyRandom,
 		},
 		TargetConfig{
 			Namespace: "default",
 			Selector:  "",
 			Port:      80,
+		},
+		HashringConfig{
+			Vnodes: 32,
 		},
 	}
 
@@ -47,7 +57,7 @@ func loadConfig() AppConfig {
 	}
 
 	if err := yaml.Unmarshal(configData, &config); err != nil {
-		slog.Error("Unable to load config file, using default")
+		slog.Error("Unable to load config file, using default", "error", err)
 	}
 
 	return config

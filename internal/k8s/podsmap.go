@@ -1,4 +1,4 @@
-package balancer
+package k8s
 
 import (
 	"errors"

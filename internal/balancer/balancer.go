@@ -16,16 +16,21 @@ import (
 type Balancer struct {
 	Client   *kubernetes.Clientset
 	Config   *config.AppConfig
-	pods     PodsMap
+	pods     k8s.PodsMap
 	strategy strategies.Strategy
 }
 
 func NewBalancer(config *config.AppConfig) *Balancer {
+	resolvedStrategy, err := config.Server.Strategy.ResolveStrategy()
+	if err != nil {
+		panic(err)
+	}
+
 	return &Balancer{
 		Client:   k8s.NewClient(),
 		Config:   config,
-		pods:     make(PodsMap, 0),
-		strategy: strategies.NewRandomStrategy(),
+		pods:     make(k8s.PodsMap, 0),
+		strategy: *resolvedStrategy,
 	}
 }
 
@@ -46,7 +51,9 @@ func (balancer *Balancer) Run() {
 		slog.Warn("No pods found! Balancer will watch the pods and idle...")
 	}
 
-	WatchPods(balancer)
+	balancer.strategy.SetPods(&balancer.pods)
+
+	k8s.WatchPods(balancer.Config.Target.Namespace, balancer.Config.Target.Selector, balancer.Client, &balancer.pods)
 }
 
 func (balancer *Balancer) GetActivePodsIp() []string {
@@ -67,4 +74,8 @@ func (balancer *Balancer) SelectServer(_ *http.Request) (string, error) {
 	}
 
 	return balancer.strategy.Select(activePods), nil
+}
+
+func (balancer *Balancer) GetPods() *k8s.PodsMap {
+	return &balancer.pods
 }

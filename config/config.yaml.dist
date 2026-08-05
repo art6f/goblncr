@@ -1,8 +1,10 @@
-
 server:
   address: ""
   port: 
   tls: false
+
+hashring:
+  vnodes: 32
 
 target:
   namespace: ""

@@ -2,16 +2,16 @@ package strategies
 
 import "math/rand"
 
-// RandomStrategy implements the Strategy interface for random distribution
 type RandomStrategy struct {
+	BaseStrategy
 }
 
-// NewRandomStrategy creates a new RandomStrategy instance
+var _ Strategy = (*RandomStrategy)(nil)
+
 func NewRandomStrategy() *RandomStrategy {
 	return &RandomStrategy{}
 }
 
-// Select selects a server randomly from the available servers
 func (r *RandomStrategy) Select(pods []string) string {
 	if len(pods) == 0 {
 		return ""
