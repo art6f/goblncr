@@ -78,6 +78,7 @@ func (podsMap PodsMap) Delete(pod *corev1.Pod) error {
 }
 
 func (podsMap PodsMap) updateActivePods() {
+	podList = make([]string, 0)
 	for _, podData := range podsMap {
 		if podData.Ready {
 			podList = append(podList, podData.Ip.String())
