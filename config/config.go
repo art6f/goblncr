@@ -1,3 +1,4 @@
+// Package config is a main config
 package config
 
 import (
@@ -12,7 +13,7 @@ import (
 type ServerConfig struct {
 	Address  string                       `yaml:"address"`
 	Port     int                          `yaml:"port"`
-	Tls      bool                         `yaml:"tls"`
+	TLS      bool                         `yaml:"tls"`
 	Strategy strategies.BalancingStrategy `yaml:"strategy"`
 }
 
@@ -38,7 +39,7 @@ func loadConfig() AppConfig {
 		ServerConfig{
 			Address:  "",
 			Port:     8080,
-			Tls:      false,
+			TLS:      false,
 			Strategy: strategies.StrategyRandom,
 		},
 		TargetConfig{
@@ -72,7 +73,7 @@ func GetConfig() AppConfig {
 	slog.Info("[BALANCER] Config",
 		"address", config.Server.Address,
 		"port", config.Server.Port,
-		"TSL", config.Server.Tls,
+		"TSL", config.Server.TLS,
 		"strategy", config.Server.Strategy)
 
 	slog.Info("[TARGET] Config", "namespace", config.Target.Namespace, "selector", config.Target.Selector, "port", config.Target.Port)
@@ -97,7 +98,7 @@ func updateConfigFromEnv(config *AppConfig) {
 	}
 
 	if tls, err := strconv.ParseBool(os.Getenv("BALANCER_TLS")); err == nil {
-		config.Server.Tls = tls
+		config.Server.TLS = tls
 	}
 
 	// Targets

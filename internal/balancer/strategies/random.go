@@ -1,6 +1,9 @@
 package strategies
 
-import "math/rand"
+import (
+	"errors"
+	"math/rand"
+)
 
 type RandomStrategy struct {
 	BaseStrategy
@@ -12,14 +15,14 @@ func NewRandomStrategy() *RandomStrategy {
 	return &RandomStrategy{}
 }
 
-func (r *RandomStrategy) Select(pods []string) string {
+func (r *RandomStrategy) Select(pods []string) (string, error) {
 	if len(pods) == 0 {
-		return ""
+		return "", errors.New("no pods to select from")
 	}
 
 	if len(pods) == 1 {
-		return pods[0]
+		return pods[0], nil
 	}
 
-	return pods[rand.Intn(len(pods))]
+	return pods[rand.Intn(len(pods))], nil
 }

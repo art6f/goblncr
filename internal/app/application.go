@@ -1,3 +1,4 @@
+// Package app is a main application
 package app
 
 import (
@@ -8,7 +9,14 @@ import (
 
 func Main() {
 	appConfig := config.GetConfig()
-	balancer := balancer.NewBalancer(&appConfig)
 
-	http.ServeHttp(&appConfig, balancer)
+	resolvedStrategy, err := appConfig.Server.Strategy.ResolveStrategy()
+	if err != nil {
+		panic(err)
+	}
+
+	balancer := balancer.NewBalancer(&appConfig, *resolvedStrategy)
+
+	server := http.GetServer(&appConfig, balancer)
+	server.ServeHTTP()
 }

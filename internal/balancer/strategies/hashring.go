@@ -10,6 +10,6 @@ func NewHashringStrategy() *HashringStrategy {
 	return &HashringStrategy{}
 }
 
-func (h *HashringStrategy) Select(servers []string) string {
+func (h *HashringStrategy) Select(servers []string) (string, error) {
 	panic("unimplemented")
 }

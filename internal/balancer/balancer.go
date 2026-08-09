@@ -1,3 +1,4 @@
+// Package balancer implements the load balancer.
 package balancer
 
 import (
@@ -20,17 +21,12 @@ type Balancer struct {
 	strategy strategies.Strategy
 }
 
-func NewBalancer(config *config.AppConfig) *Balancer {
-	resolvedStrategy, err := config.Server.Strategy.ResolveStrategy()
-	if err != nil {
-		panic(err)
-	}
-
+func NewBalancer(config *config.AppConfig, strategy strategies.Strategy) *Balancer {
 	return &Balancer{
 		Client:   k8s.NewClient(),
 		Config:   config,
 		pods:     make(k8s.PodsMap, 0),
-		strategy: *resolvedStrategy,
+		strategy: strategy,
 	}
 }
 
@@ -60,10 +56,10 @@ func (balancer *Balancer) SelectServer(_ *http.Request) (string, error) {
 	activePods := balancer.pods.GetActivePodsIp()
 
 	if len(activePods) == 0 {
-		return "", errors.New("No pods available")
+		return "", errors.New("NO PODS AVAILABLE")
 	}
 
-	return balancer.strategy.Select(activePods), nil
+	return balancer.strategy.Select(activePods)
 }
 
 func (balancer *Balancer) GetPods() *k8s.PodsMap {

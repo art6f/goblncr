@@ -1,3 +1,4 @@
+// Package strategies implements the different balancing strats
 package strategies
 
 import (
@@ -15,7 +16,6 @@ const (
 	StrategyHashring
 )
 
-// YAML string to type resolver
 func (s *BalancingStrategy) UnmarshalYAML(node *yaml.Node) error {
 	switch strings.ToLower(node.Value) {
 	case "hashring":
@@ -26,8 +26,6 @@ func (s *BalancingStrategy) UnmarshalYAML(node *yaml.Node) error {
 
 	return nil
 }
-
-// stringyfy the name
 func (s BalancingStrategy) String() string {
 	switch s {
 	case StrategyRandom:
@@ -52,7 +50,7 @@ func (s *BalancingStrategy) ResolveStrategy() (*Strategy, error) {
 	}
 
 	if strategy == nil {
-		return nil, errors.New("Not implemented")
+		return nil, errors.New("not implemented")
 	}
 
 	return &strategy, nil
@@ -64,7 +62,7 @@ type BaseStrategy struct {
 
 type Strategy interface {
 	SetPods(pods *k8s.PodsMap)
-	Select(servers []string) string
+	Select(servers []string) (string, error)
 }
 
 func (base *BaseStrategy) SetPods(pods *k8s.PodsMap) {

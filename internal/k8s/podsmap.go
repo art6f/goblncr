@@ -18,9 +18,8 @@ type PodsMap map[string]*PodInfo
 var podList []string
 
 func (podsMap PodsMap) Add(pod *corev1.Pod) error {
-
 	if len(pod.Name) == 0 {
-		return errors.New("Unable to add pod: pod has no name")
+		return errors.New("unable to add pod: pod has no name")
 	}
 
 	ip, err := podsMap.getPodIp(pod)
@@ -40,12 +39,12 @@ func (podsMap PodsMap) Add(pod *corev1.Pod) error {
 
 func (podsMap PodsMap) Update(pod *corev1.Pod) error {
 	if len(pod.Name) == 0 {
-		return errors.New("Unable to update pod: pod has no name")
+		return errors.New("unable to update pod: pod has no name")
 	}
 
 	entry, ok := podsMap[pod.Name]
-	if ok != true {
-		return errors.New("Unable to update pod: unknown")
+	if !ok {
+		return errors.New("unable to update pod: unknown")
 	}
 
 	ip, err := podsMap.getPodIp(pod)
@@ -63,11 +62,11 @@ func (podsMap PodsMap) Update(pod *corev1.Pod) error {
 
 func (podsMap PodsMap) Delete(pod *corev1.Pod) error {
 	if len(pod.Name) == 0 {
-		return errors.New("Unable to delete pod: pod has no name")
+		return errors.New("unable to delete pod: pod has no name")
 	}
 
-	if _, ok := podsMap[pod.Name]; ok != true {
-		return errors.New("Unable to delete pod: unknown")
+	if _, ok := podsMap[pod.Name]; !ok {
+		return errors.New("unable to delete pod: unknown")
 	}
 
 	delete(podsMap, pod.Name)
@@ -100,7 +99,7 @@ func (podsMap PodsMap) getPodIp(pod *corev1.Pod) (netip.Addr, error) {
 	}
 	parsedIp, err := netip.ParseAddr(pod.Status.PodIP)
 	if err != nil {
-		return netip.Addr{}, fmt.Errorf("Unable to add pod - IP parsing failed: %s", err.Error())
+		return netip.Addr{}, fmt.Errorf("unable to add pod - IP parsing failed: %s", err.Error())
 	}
 
 	return parsedIp, nil
