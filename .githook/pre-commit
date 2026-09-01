@@ -1,15 +1,39 @@
 #!/bin/sh
 
-echo "Checking the file gofmt..."
-docker run --mount type=bind,src=./,dst=/app golang:1.26 gofmt -d -e /app
+# Formatting check
+printf "Checking the file gofmt..."
 
-if [[ "$?" -ne 0 ]]; then
-	echo "Not all the files are properly formatted, attempting to reformat them..."
-	docker run --mount type=bind,src=./,dst=/app golang:1.26 gofmt -w /app
+docker run --rm --mount type=bind,src=./,dst=/app golang:1.26 gofmt -d -e /app
+error_formatting=$?
 
-	echo "Please check the changes, commit and push them again"
+if [[ "$error_formatting" -ne 0 ]]; then
+	printf "FAIL\n"
+	printf "Not all the files are properly formatted, attempting to reformat them...\n"
+	
+	docker run --rm --mount type=bind,src=./,dst=/app golang:1.26 gofmt -w /app
+
+	printf "Please check the changes, commit and push them again\n"
+else
+	printf "DONE\n"
+fi
+
+
+# Alignment check
+printf "Checking the alignment..."
+
+docker run --rm --mount type=bind,src=./,dst=/app golang:1.26 \
+sh -c 'go install github.com/dkorunic/betteralign/cmd/betteralign@v0.14.4 && cd /app && betteralign ./...'
+
+error_formatting=$?
+
+if [[ "$error_formatting" -ne 0 ]]; then
+	printf "Some alignment issues detected, consider running 'betteralign --fix ./...'\n"
+fi
+
+if [[ $error_formatting -ne 0 || $error_alignment -ne 0 ]]; then
+	printf "\nPlease check for errors and re-commit.\n"
 	exit 1
 fi
 
-echo "Check is done"
+printf "All checks are done"
 exit 0

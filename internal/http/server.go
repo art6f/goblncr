@@ -18,10 +18,10 @@ import (
 var templatesFS embed.FS
 
 type HTTPServer struct {
+	balancer      *balancer.Balancer
 	serverAddress string
 	serverPort    int
 	targetPort    int
-	balancer      *balancer.Balancer
 }
 
 var singleInstance *HTTPServer = nil

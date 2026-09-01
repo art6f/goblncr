@@ -1,8 +1,9 @@
-FROM golang:1.26.5
+FROM golang:1.26.5 AS goblncr-dev
 
 WORKDIR /app
 
 RUN go install github.com/go-delve/delve/cmd/dlv@master
+RUN go install github.com/dkorunic/betteralign/cmd/betteralign@v0.14.4
 
 COPY ./build/goblncr-dbg /app/goblncr-dbg
 COPY ./config/config.yaml /app/

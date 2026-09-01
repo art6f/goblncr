@@ -12,9 +12,9 @@ import (
 
 type ServerConfig struct {
 	Address  string                       `yaml:"address"`
+	Strategy strategies.BalancingStrategy `yaml:"strategy"`
 	Port     int                          `yaml:"port"`
 	TLS      bool                         `yaml:"tls"`
-	Strategy strategies.BalancingStrategy `yaml:"strategy"`
 }
 
 type HashringConfig struct {
@@ -36,18 +36,18 @@ type AppConfig struct {
 func loadConfig() AppConfig {
 	// defaults
 	config := AppConfig{
-		ServerConfig{
+		Server: ServerConfig{
+			Strategy: strategies.StrategyRandom,
 			Address:  "",
 			Port:     8080,
 			TLS:      false,
-			Strategy: strategies.StrategyRandom,
 		},
-		TargetConfig{
+		Target: TargetConfig{
 			Namespace: "default",
 			Selector:  "",
 			Port:      80,
 		},
-		HashringConfig{
+		Hashring: HashringConfig{
 			Vnodes: 32,
 		},
 	}
