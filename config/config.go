@@ -28,8 +28,8 @@ type TargetConfig struct {
 }
 
 type AppConfig struct {
-	Server   ServerConfig   `yaml:"server"`
 	Target   TargetConfig   `yaml:"target"`
+	Server   ServerConfig   `yaml:"server"`
 	Hashring HashringConfig `yaml:"hashring"`
 }
 
